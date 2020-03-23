@@ -9,7 +9,6 @@ let Data, infected, deaths, curesR, cures, Population, population, epoch, day, p
   pmin = Infinity;
 
 function preload() {
-  // Get the most recent earthquake in the database
   let url = 'corona.json';
   Data = loadJSON(url);
 }
@@ -70,7 +69,6 @@ function dataSetup(infected, deaths, cures, population) {
     deaths.unshift(0);
   }
   curesR.map((c) => {
-    // cures.push(c * (266073 / 304622));
     cures.push(c);
   })
   let kfill = infected.length - cures.length;
@@ -88,18 +86,14 @@ function dataSetup(infected, deaths, cures, population) {
   EVR = 1 - avgDelta(cures);
   for (let i = 1; i < projection; i++) {
     let S1 = sinfected.length - 1;
-    let ps = Population - sinfected[S1] - (sdeaths[S1] + scures[S1]) / 2;
-    let pos = 1 - sinfected[S1] / (ps);
-    // sinfected.push(sinfected[i - 1] * (1 + EVI) * (pos));
-    // sdeaths.push(sdeaths[i - 1] * (1 + EVD) * (pos));
-    // scures.push(scures[i - 1] * (1 + EVR));
+    // current population with growth rate (assuming cured cannot be reinfected)
+    let ps = Population * 1.05 - sinfected[S1];
+    // probability of infected of current population
     let posi = 1 - sinfected[S1] / ps;
-    // let posd = 1 - sdeaths[S1] / (sinfected[S1] - sdeaths[S1] - scures[S1]);
-    // let posr = 1 - scures[S1] / (sinfected[S1] - sdeaths[S1] - scures[S1]);
+    // probability of dead of current population
     let posd = 1 - sdeaths[S1] / ps;
+    // probability of recovered of current population
     let posr = 1 - scures[S1] / ps;
-    console.log(posd,posr);
-    // posr = 1;
     sinfected.push(sinfected[i - 1] * (1 + EVI) * posi);
     sdeaths.push(sdeaths[i - 1] * (1 + EVD) * posd);
     scures.push(scures[i - 1] * (1 + EVR) * posr);
@@ -125,17 +119,6 @@ function avgDelta(ary) {
     r += ary[infected.length - i - 1] / ary[infected.length - i];
   }
   return r / s;
-  // let L1 = infected.length - 1;
-  // let L2 = infected.length - 2;
-  // let L3 = infected.length - 3;
-  // let L4 = infected.length - 4;
-  // let L5 = infected.length - 5;
-  // return ((
-  //   ary[L5] / ary[L4] +
-  //   ary[L4] / ary[L3] +
-  //   ary[L3] / ary[L2] +
-  //   ary[L2] / ary[L1]
-  // ) / 4);
 }
 
 let actual = 0;
@@ -151,7 +134,7 @@ function draw() {
   textSize(24);
   textAlign(LEFT);
   noStroke();
-  text("Coronavirus Projection Model", 10, 33);
+  text("Coronavirus Projection Model (Total affect)", 10, 33);
   textSize(12);
   fill(200)
   actual = infected.length - projection;
