@@ -62,13 +62,16 @@ function setup() {
   });
 }
 
+let EVI, EVD, EVR, POS;
+
 function dataSetup(infected, deaths, cures, population) {
   let jfill = infected.length - deaths.length;
   for (let j = 0; j < jfill; j++) {
     deaths.unshift(0);
   }
   curesR.map((c) => {
-    cures.push(c * (266073 / 304622));
+    // cures.push(c * (266073 / 304622));
+    cures.push(c);
   })
   let kfill = infected.length - cures.length;
   for (let k = 0; k < kfill; k++) {
@@ -80,9 +83,9 @@ function dataSetup(infected, deaths, cures, population) {
   sdeaths.push(deaths[deaths.length - 1]);
   scures.push(cures[cures.length - 1]);
 
-  let EVI = 1 - avgDelta(infected);
-  let EVD = 1 - avgDelta(deaths);
-  let EVR = 1 - avgDelta(cures);
+  EVI = 1 - avgDelta(infected);
+  EVD = 1 - avgDelta(deaths);
+  EVR = 1 - avgDelta(cures);
   for (let i = 1; i < projection; i++) {
     let S1 = sinfected.length - 1;
     let pos = 1 - sinfected[S1] / (Population - sdeaths[S1] - sinfected[S1] - scures[S1]);
@@ -137,13 +140,13 @@ function draw() {
   actual = infected.length - projection;
   text(infected.length + " days (" + actual + " actual " + projection + " projected)", 10, 52)
   fill(0, 180, 255);
-  text("Population Curve", 10, 71);
+  text("Population Curve ", 10, 71);
   fill(255, 255, 0);
-  text("Infection Curve", 10, 90);
+  text("Infection Curve (" + (EVI * 100).toFixed(2) + "%) growth rate", 10, 90);
   fill(0, 255, 128);
-  text("Recovery Curve", 10, 109);
+  text("Recovery Curve (" + (EVR * 100).toFixed(2) + "%) growth rate", 10, 109);
   fill(255, 0, 128);
-  text("Mortality Curve", 10, 128);
+  text("Mortality Curve (" + (EVD * 100).toFixed(2) + "%) growth rate", 10, 128);
   pop();
 
   push();
@@ -230,7 +233,11 @@ function draw() {
       textSize(12);
       noStroke();
       fill(255, 255, 0, 128);
-      text(formatCommas(m), 5, _ho - 4);
+      if (imax / dmax < 1.1 && dmax > imax) {
+        text(formatCommas(m), 5, _ho + 14);
+      } else {
+        text(formatCommas(m), 5, _ho - 4);
+      }
       pop();
     }
     if (i == actual) {
@@ -260,7 +267,11 @@ function draw() {
       textSize(12);
       noStroke();
       fill(255, 0, 128, 128);
-      text(formatCommas(m), 5, _ho - 4);
+      if (dmax / imax < 1.1 && imax > dmax) {
+        text(formatCommas(m), 5, _ho + 14);
+      } else {
+        text(formatCommas(m), 5, _ho - 4);
+      }
       pop();
     }
     if (i == actual) {
