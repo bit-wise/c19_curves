@@ -23,7 +23,7 @@ function setup() {
   population = [];
   epoch = 1579564800000;
   day = 1579651200000 - epoch;
-  projection = 700;
+  projection = 365;
   W = window.innerWidth;
   H = window.innerHeight;
   W2 = W / 2;
@@ -88,12 +88,23 @@ function dataSetup(infected, deaths, cures, population) {
   EVR = 1 - avgDelta(cures);
   for (let i = 1; i < projection; i++) {
     let S1 = sinfected.length - 1;
-    let pos = 1 - sinfected[S1] / (Population - sdeaths[S1] - sinfected[S1] - scures[S1]);
-    sinfected.push(sinfected[i - 1] * (1 + EVI) * pos);
-    sdeaths.push(sdeaths[i - 1] * (1 + EVD) * pos);
-    scures.push(scures[i - 1] * (1 + EVR));
+    let ps = Population - sinfected[S1] - (sdeaths[S1] + scures[S1]) / 2;
+    let pos = 1 - sinfected[S1] / (ps);
+    // sinfected.push(sinfected[i - 1] * (1 + EVI) * (pos));
+    // sdeaths.push(sdeaths[i - 1] * (1 + EVD) * (pos));
+    // scures.push(scures[i - 1] * (1 + EVR));
+    let posi = 1 - sinfected[S1] / ps;
+    // let posd = 1 - sdeaths[S1] / (sinfected[S1] - sdeaths[S1] - scures[S1]);
+    // let posr = 1 - scures[S1] / (sinfected[S1] - sdeaths[S1] - scures[S1]);
+    let posd = 1 - sdeaths[S1] / ps;
+    let posr = 1 - scures[S1] / ps;
+    console.log(posd,posr);
+    // posr = 1;
+    sinfected.push(sinfected[i - 1] * (1 + EVI) * posi);
+    sdeaths.push(sdeaths[i - 1] * (1 + EVD) * posd);
+    scures.push(scures[i - 1] * (1 + EVR) * posr);
 
-    if (pos >= 1) {
+    if (scures[i] >= sinfected[i] || sdeaths[i] >= sinfected[i]) {
       projection = i;
       break;
     }
@@ -108,17 +119,23 @@ function dataSetup(infected, deaths, cures, population) {
 }
 
 function avgDelta(ary) {
-  let L1 = infected.length - 1;
-  let L2 = infected.length - 2;
-  let L3 = infected.length - 3;
-  let L4 = infected.length - 4;
-  let L5 = infected.length - 5;
-  return ((
-    ary[L5] / ary[L4] +
-    ary[L4] / ary[L3] +
-    ary[L3] / ary[L2] +
-    ary[L2] / ary[L1]
-  ) / 4);
+  let s = 7;
+  let r = 0;
+  for(let i = 1; i <= s; i++){
+    r += ary[infected.length - i - 1] / ary[infected.length - i];
+  }
+  return r / s;
+  // let L1 = infected.length - 1;
+  // let L2 = infected.length - 2;
+  // let L3 = infected.length - 3;
+  // let L4 = infected.length - 4;
+  // let L5 = infected.length - 5;
+  // return ((
+  //   ary[L5] / ary[L4] +
+  //   ary[L4] / ary[L3] +
+  //   ary[L3] / ary[L2] +
+  //   ary[L2] / ary[L1]
+  // ) / 4);
 }
 
 let actual = 0;
@@ -134,7 +151,7 @@ function draw() {
   textSize(24);
   textAlign(LEFT);
   noStroke();
-  text("Coronavirus Curves", 10, 33);
+  text("Coronavirus Projection Model", 10, 33);
   textSize(12);
   fill(200)
   actual = infected.length - projection;
