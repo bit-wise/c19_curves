@@ -9,7 +9,7 @@ let Data, infected, deaths, curesR, cures, Population, population, epoch, day, p
   pmin = Infinity;
 
 function preload() {
-  let url = 'corona.json';
+  let url = '/sketches/8FR4O6KDP/assets/corona.json';
   Data = loadJSON(url);
 }
 
@@ -22,7 +22,7 @@ function setup() {
   population = [];
   epoch = 1579564800000;
   day = 1579651200000 - epoch;
-  projection = 365;
+  projection = 365 * 3;
   W = window.innerWidth;
   H = window.innerHeight;
   W2 = W / 2;
@@ -61,7 +61,7 @@ function setup() {
   });
 }
 
-let EVI, EVD, EVR, POS;
+let EVI, EVD, EVR, POS, evr, acc;
 
 function dataSetup(infected, deaths, cures, population) {
   let jfill = infected.length - deaths.length;
@@ -84,16 +84,23 @@ function dataSetup(infected, deaths, cures, population) {
   EVI = 1 - avgDelta(infected);
   EVD = 1 - avgDelta(deaths);
   EVR = 1 - avgDelta(cures);
+  // effectiveness of viral infection (OR inverse human immunability).
+  evr = deaths[deaths.length - 1] / deaths[deaths.length - 2] - 1;
+  // access to hosts
+  acc = infected[infected.length - 1] / infected[infected.length - 2] - 1;
+  console.log(evr, acc)
   for (let i = 1; i < projection; i++) {
     let S1 = sinfected.length - 1;
+    // rates of decay
     // current population with growth rate (assuming cured cannot be reinfected)
-    let ps = Population * 1.05 - sinfected[S1];
-    // probability of infected of current population
-    let posi = 1 - sinfected[S1] / ps;
-    // probability of dead of current population
-    let posd = 1 - sdeaths[S1] / ps;
-    // probability of recovered of current population
-    let posr = 1 - scures[S1] / ps;
+    let ps = (Population * 1.05 * evr * acc) - (sinfected[S1]);
+    // inverse probability of infection of current population
+    let posi = 1 - sinfected[S1] / (ps);
+    // inverse probability of death of current population
+    let posd = 1 - sdeaths[S1] / (ps);
+    // inverse probability of recovery of current population
+    let posr = 1 - scures[S1] / (ps);
+    // previous_inf * growth_rate * rate_decay
     sinfected.push(sinfected[i - 1] * (1 + EVI) * posi);
     sdeaths.push(sdeaths[i - 1] * (1 + EVD) * posd);
     scures.push(scures[i - 1] * (1 + EVR) * posr);
@@ -115,7 +122,7 @@ function dataSetup(infected, deaths, cures, population) {
 function avgDelta(ary) {
   let s = 7;
   let r = 0;
-  for(let i = 1; i <= s; i++){
+  for (let i = 1; i <= s; i++) {
     r += ary[infected.length - i - 1] / ary[infected.length - i];
   }
   return r / s;
@@ -134,7 +141,7 @@ function draw() {
   textSize(24);
   textAlign(LEFT);
   noStroke();
-  text("Coronavirus Projection Model (Total affect)", 10, 33);
+  text("Coronavirus Projection Model", 10, 33);
   textSize(12);
   fill(200)
   actual = infected.length - projection;
@@ -142,11 +149,15 @@ function draw() {
   fill(0, 180, 255);
   text("Population Curve ", 10, 71);
   fill(255, 255, 0);
-  text("Infection Curve (" + (EVI * 100).toFixed(2) + "%) growth rate", 10, 90);
+  text("Infection Curve (" + (EVI * 100).toFixed(2) + "% growth rate)", 10, 90);
   fill(0, 255, 128);
-  text("Recovery Curve (" + (EVR * 100).toFixed(2) + "%) growth rate", 10, 109);
+  text("Recovery Curve (" + (EVR * 100).toFixed(2) + "% growth rate)", 10, 109);
   fill(255, 0, 128);
-  text("Mortality Curve (" + (EVD * 100).toFixed(2) + "%) growth rate", 10, 128);
+  text("Mortality Curve (" + (EVD * 100).toFixed(2) + "% growth rate)", 10, 128);
+  fill(180);
+  textAlign(RIGHT);
+  text("estimated efficiency: " + (evr * 100).toFixed(2) + "%", W - 10, 25)
+  text("estimated transmissibility: " + (acc * 100).toFixed(2) + "%", W - 10, 40)
   pop();
 
   push();
@@ -186,7 +197,7 @@ function draw() {
       textAlign(RIGHT);
       noStroke();
       fill(255, 255, 255, 180);
-      text("now", i * _W - 2, H - 2);
+      text("now\n" + formatDate(epoch + i * day), i * _W - 2, H - 20);
       pop();
     }
   }
@@ -294,6 +305,20 @@ function draw() {
     stroke(0, 255, 128);
     let _ho = H - Math.log10(m) * _H;
     vertex(i * _W, _ho);
+    if (m == cmax) {
+      push();
+      stroke(0, 255, 128, 128);
+      line(0, _ho, W, _ho);
+      textSize(12);
+      noStroke();
+      fill(0, 255, 128, 128);
+      if (dmax / imax < 1.1 && imax > dmax) {
+        text(formatCommas(m), 5, _ho + 14);
+      } else {
+        text(formatCommas(m), 5, _ho - 4);
+      }
+      pop();
+    }
     if (i == actual) {
       push();
       stroke(0, 255, 128);
