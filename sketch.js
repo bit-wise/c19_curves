@@ -88,7 +88,7 @@ function dataSetup(infected, deaths, cures, population) {
   evr = deaths[deaths.length - 1] / deaths[deaths.length - 2] - 1;
   // access to hosts
   acc = infected[infected.length - 1] / infected[infected.length - 2] - 1;
-  // incubation period - time of unknown transmission 
+  // incubation period, insufficient testing equip., unreported / misdiagnosed cases -- unknown factor 
   acc = acc * 5;
   console.log(evr, acc)
   for (let i = 1; i < projection; i++) {
