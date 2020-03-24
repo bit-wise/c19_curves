@@ -89,13 +89,13 @@ function dataSetup(infected, deaths, cures, population) {
   // access to hosts
   acc = infected[infected.length - 1] / infected[infected.length - 2] - 1;
   // incubation period, insufficient testing equip., unreported / misdiagnosed cases -- unknown factor 
-  acc = acc * 5;
-  console.log(evr, acc)
+  unk = 26 / (infected.length);
+  console.log(evr, acc, unk, projection / infected.length)
   for (let i = 1; i < projection; i++) {
     let S1 = sinfected.length - 1;
     // rates of decay
     // current population with growth rate (assuming cured cannot be reinfected)
-    let ps = (Population * 1.05 * evr * acc) - (sinfected[S1]);
+    let ps = (Population * 1.05 * evr * acc * (1 + unk)) - (sinfected[S1]);
     // inverse probability of infection of current population
     let posi = 1 - sinfected[S1] / (ps);
     // inverse probability of death of current population
@@ -158,8 +158,9 @@ function draw() {
   text("Mortality Curve (" + (EVD * 100).toFixed(2) + "% growth rate)", 10, 128);
   fill(180);
   textAlign(RIGHT);
-  text("estimated efficiency: " + (evr * 100).toFixed(2) + "%", W - 10, 25)
-  text("estimated transmissibility: " + (acc * 100).toFixed(2) + "%", W - 10, 40)
+  text("estimated efficiency: " + (evr * 100).toFixed(2) + "%", W - 10, 25);
+  text("estimated transmissibility: " + (acc * 100).toFixed(2) + "%", W - 10, 40);
+  text("estimated unknown cases: " + (unk * 100).toFixed(2) + "%", W - 10, 55);
   pop();
 
   push();
