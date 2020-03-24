@@ -88,6 +88,8 @@ function dataSetup(infected, deaths, cures, population) {
   evr = deaths[deaths.length - 1] / deaths[deaths.length - 2] - 1;
   // access to hosts
   acc = infected[infected.length - 1] / infected[infected.length - 2] - 1;
+  // incubation period - time of unknown transmission 
+  acc = acc * 5;
   console.log(evr, acc)
   for (let i = 1; i < projection; i++) {
     let S1 = sinfected.length - 1;
@@ -105,7 +107,7 @@ function dataSetup(infected, deaths, cures, population) {
     sdeaths.push(sdeaths[i - 1] * (1 + EVD) * posd);
     scures.push(scures[i - 1] * (1 + EVR) * posr);
 
-    if (scures[i] >= sinfected[i] || sdeaths[i] >= sinfected[i]) {
+    if (scures[i] + sdeaths[i] >= sinfected[i]) {
       projection = i;
       break;
     }
