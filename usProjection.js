@@ -67,39 +67,41 @@ function setup() {
       Proj[0]['_' + P.v] = P.finNum;
       Proj[0]['_' + P.v + 'dif'] = Proj[0]['_' + P.v] / Data[Dlng - 1][P.v];
       Proj[0]['_' + P.v + 'dif2'] = Data[Dlng - 1][P.v] / Data[Dlng - 2][P.v];
-      Proj[0]['_' + P.v + 'dif3'] = Proj[0]['_' + P.v + 'dif'] - Proj[0]['_' + P.v + 'dif2'];
-      Proj[0]['_' + P.v + 'dif4'] = Proj[0]['_' + P.v + 'dif'] + Proj[0]['_' + P.v + 'dif3'];
+      Proj[0]['_' + P.v + 'dif3'] = Proj[0]['_' + P.v + 'dif'] / Proj[0]['_' + P.v + 'dif2'];
+      Proj[0]['_' + P.v + 'dif4'] = Proj[0]['_' + P.v + 'dif'] * Proj[0]['_' + P.v + 'dif3'];
       Proj[0][P.v] = Math.ceil(Proj[0]['_' + P.v] * Proj[0]['_' + P.v + 'dif4']);
 
       Proj[1]['_' + P.v] = Proj[0][P.v];
       Proj[1]['_' + P.v + 'dif'] = Proj[1]['_' + P.v] / Proj[0]['_' + P.v];
       Proj[1]['_' + P.v + 'dif2'] = Proj[0]['_' + P.v] / Data[Dlng - 1][P.v];
-      Proj[1]['_' + P.v + 'dif3'] = Proj[1]['_' + P.v + 'dif'] - Proj[1]['_' + P.v + 'dif2'];
-      Proj[1]['_' + P.v + 'dif4'] = Proj[1]['_' + P.v + 'dif'] + Proj[1]['_' + P.v + 'dif3'];
+      Proj[1]['_' + P.v + 'dif3'] = Proj[1]['_' + P.v + 'dif'] / Proj[1]['_' + P.v + 'dif2'];
+      Proj[1]['_' + P.v + 'dif4'] = Proj[1]['_' + P.v + 'dif'] * Proj[1]['_' + P.v + 'dif3'];
       Proj[1][P.v] = Math.ceil(Proj[1]['_' + P.v] * Proj[1]['_' + P.v + 'dif4']);
 
       Proj[2]['_' + P.v] = Proj[1][P.v];
       Proj[2]['_' + P.v + 'dif'] = Proj[2]['_' + P.v] / Proj[1]['_' + P.v];
       Proj[2]['_' + P.v + 'dif2'] = Proj[1]['_' + P.v] / Proj[0]['_' + P.v];
-      Proj[2]['_' + P.v + 'dif3'] = Proj[2]['_' + P.v + 'dif'] - Proj[2]['_' + P.v + 'dif2'];
-      Proj[2]['_' + P.v + 'dif4'] = Proj[2]['_' + P.v + 'dif'] + Proj[2]['_' + P.v + 'dif3'];
+      Proj[2]['_' + P.v + 'dif3'] = Proj[2]['_' + P.v + 'dif'] / Proj[2]['_' + P.v + 'dif2'];
+      Proj[2]['_' + P.v + 'dif4'] = Proj[2]['_' + P.v + 'dif'] * Proj[2]['_' + P.v + 'dif3'];
       Proj[2][P.v] = Math.ceil(Proj[2]['_' + P.v] * Proj[2]['_' + P.v + 'dif4']);
     });
   });
 
   // projection
-  for (let i = 3; i <= 21 - 1; i++) {
+  for (let i = 3; i <= 7 * 6 - 1; i++) {
     Proj.push({});
     Prop.map((P, j) => {
       Proj[i]['_' + P.v] = Proj[i - 1][P.v];
       Proj[i]['_' + P.v + 'dif'] = Proj[i]['_' + P.v] / Proj[i - 1]['_' + P.v];
       Proj[i]['_' + P.v + 'dif2'] = Proj[i - 1]['_' + P.v] / Proj[i - 2]['_' + P.v];
-      Proj[i]['_' + P.v + 'dif3'] = Proj[i]['_' + P.v + 'dif'] - Proj[i]['_' + P.v + 'dif2'];
-      Proj[i]['_' + P.v + 'dif4'] = Proj[i]['_' + P.v + 'dif'] + Proj[i]['_' + P.v + 'dif3'];
+      // Proj[i]['_' + P.v + 'dif3'] = Proj[i]['_' + P.v + 'dif'] - Proj[i]['_' + P.v + 'dif2'];
+      // Proj[i]['_' + P.v + 'dif4'] = Proj[i]['_' + P.v + 'dif'] + Proj[i]['_' + P.v + 'dif3'];
+      Proj[i]['_' + P.v + 'dif3'] = Proj[i]['_' + P.v + 'dif'] / Proj[i]['_' + P.v + 'dif2'];
+      Proj[i]['_' + P.v + 'dif4'] = Proj[i]['_' + P.v + 'dif'] * Proj[i]['_' + P.v + 'dif3'];
       Proj[i][P.v] = Math.ceil(Proj[i]['_' + P.v] * Proj[i]['_' + P.v + 'dif4']);
     });
   }
-
+  console.log(Proj)
   // scales
   Wi = W / (Data.length + Proj.length);
   mxlog = Math.ceil(Math.log10(mmax)) + 1;
@@ -197,8 +199,8 @@ function draw() {
     }
   });
 
-    Proj.map((m, i) => {
-      let _i = i + Data.length;
+  Proj.map((m, i) => {
+    let _i = i + Data.length;
     stroke(255, 255, 255, 16);
     line(_i * Wi, 0, _i * Wi, H);
     if (_i % 7 == 0) {
@@ -206,7 +208,7 @@ function draw() {
       line(_i * Wi, 0, _i * Wi, H);
     }
   });
-  
+
   for (let i = 0; i <= mxlog; i++) {
     let _i = Math.pow(10, i);
     let im;
